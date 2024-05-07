@@ -1,0 +1,88 @@
+const { makeid } = require('./utils');
+const cors = require('cors');
+const express = require('express');
+const http = require('http'); 
+const port = 5000;
+const app = express();
+app.use(cors());
+const server = http.createServer(app);
+
+// Attach Socket.IO to the HTTP server
+const io = require('socket.io')(server, {
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST']
+    }
+});
+
+const clientRooms = {}; 
+const roomCounters = {};
+
+io.on('connection', client => {
+    console.log('Client Connected: ', client.id);
+    client.on('joinGame', handleJoinGame);
+    client.on('newGame', handleNewGame);
+
+    function handleJoinGame(roomName) {
+        console.log('Joining room', roomName);
+        const room = io.sockets.adapter.rooms.get(roomName);
+        console.log('Room', room);
+
+        let numClients = 0;
+        if (room) {
+            numClients = room.size;
+        }
+    
+        console.log("The rooms available", clientRooms);
+        if (numClients === 0) {
+          console.log('Room not found');
+          client.emit('unknownCode');
+          return;
+        } else if (numClients > 1) {
+          console.log('Room is full');
+          client.emit('tooManyPlayers');
+          return;
+        }
+        console.log('Room found');
+
+        clientRooms[client.id] = roomName; 
+    
+        client.join(roomName);
+        client.number = 2;
+        console.log('Room joined starting game');
+        client.emit('init', 2);
+    }
+
+    function handleNewGame() {
+        let roomName = makeid(5);
+        clientRooms[client.id] = roomName; 
+        console.log('Creating new game with room name', roomName);
+
+        client.emit('gameCode', roomName);
+
+        client.join(roomName);
+        client.number = 1;
+        client.emit('init', 1);
+    }
+    client.on('pressButton', roomName => {
+        // Increment the counter for the room
+        if (!roomCounters[roomName]) {
+            roomCounters[roomName] = 0;
+        }
+        roomCounters[roomName]++;
+
+        // Broadcast the updated counter to all clients in the room
+        io.to(roomName).emit('updateCounter', { roomName, count: roomCounters[roomName] });
+    });
+
+    
+    client.on('disconnect', () => {
+        console.log('A client disconnected');
+        delete clientRooms[client.id];
+    });
+});
+
+// Start the HTTP server
+server.listen(port, () => {
+    console.log(`Server started on port ${port}`);
+});
