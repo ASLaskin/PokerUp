@@ -3,29 +3,31 @@ import { useLocation } from 'react-router-dom';
 
 function Play({ socket }) {
     const location = useLocation();
-    const [count, setCount] = useState(0);
+    const [players, setPlayers] = useState([]);
 
     useEffect(() => {
-        socket.on('updateCounter', ({ roomName, count }) => {
-            if (roomName === location.state.name) {
-                setCount(count);
-            }
-        });
-        return () => {
-            socket.off('updateCounter');
-        };
-    }, [socket, location.state.name]);
+        socket.on('updatePlayers', handleUpdatePlayers);
 
-    const handleButtonClick = () => {
-        socket.emit('pressButton', location.state.name);
-    };
+        return () => {
+            socket.off('updatePlayers', handleUpdatePlayers);
+        };
+    }, [socket]);
+
+   
+    function handleUpdatePlayers(updatedPlayers) {
+        setPlayers(updatedPlayers);
+    }
 
     return (
         <>
             <div>Play</div>
             <div>Room Name: {location.state.name}</div>
-            <div>Counter: {count}</div>
-            <button onClick={handleButtonClick}>Press Button</button>
+            <div>Players:</div>
+            <ul>
+                {players.map((playerId, index) => (
+                    <li key={index}>{playerId}</li>
+                ))}
+            </ul>
         </>
     );
 }
