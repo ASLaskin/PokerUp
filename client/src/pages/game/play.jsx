@@ -6,6 +6,7 @@ function Play({ socket }) {
     const [players, setPlayers] = useState([]);
 
     useEffect(() => {
+        socket.emit('requestPlayers')
         socket.on('updatePlayers', handleUpdatePlayers);
 
         return () => {

@@ -97,6 +97,14 @@ io.on('connection', client => {
         console.log('Players in room', roomName, playersInRoom[roomName]);
     }
 
+    client.on('requestPlayers', () => {
+        console.log('Requesting players');
+        const roomName = clientRooms[client.id];
+        if (roomName && playersInRoom[roomName]) {
+            client.emit('updatePlayers', playersInRoom[roomName]);
+        }
+    });
+
     client.on('disconnect', () => {
         console.log('A client disconnected');
         const roomName = clientRooms[client.id];
