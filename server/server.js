@@ -114,7 +114,12 @@ io.on('connection', client => {
     //I want to move these to different files so this one isnt crazy long
     function handleDealCards(socket, roomName, players) {
         console.log('Dealing cards');
-        const deck = ['Ace', 'King', 'Queen', 'Jack', '10', '9', '8', '7', '6', '5', '4', '3', '2'];
+        const deck = [
+            'As', 'Ks', 'Qs', 'Js', '10s', '9s', '8s', '7s', '6s', '5s', '4s', '3s', '2s',
+            'Ad', 'Kd', 'Qd', 'Jd', '10d', '9d', '8d', '7d', '6d', '5d', '4d', '3d', '2d',
+            'Ac', 'Kc', 'Qc', 'Jc', '10c', '9c', '8c', '7c', '6c', '5c', '4c', '3c', '2c',
+            'Ah', 'Kh', 'Qh', 'Jh', '10h', '9h', '8h', '7h', '6h', '5h', '4h', '3h', '2h'
+        ];
         
         const shuffledDeck = shuffle(deck);
     
