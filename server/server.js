@@ -1,13 +1,26 @@
+require('dotenv').config();
 const { makeid } = require('./utils');
 const cors = require('cors');
 const express = require('express');
 const http = require('http');
+const mongoose = require('mongoose');
 const port = 5000;
 const app = express();
 app.use(cors());
 const server = http.createServer(app);
 
-// Attach Socket.IO to the HTTP server
+
+const MONGODB_PASS = process.env.MongoDBPass;
+const mongoURI = `mongodb+srv://AndrewPokerUp:${MONGODB_PASS}@cluster0.axjopzt.mongodb.net/?retryWrites=true&w=majority`;
+
+mongoose.connect(mongoURI)
+  .then(() => {
+    console.log('Connected to MongoDB');
+  })
+  .catch((err) => {
+    console.error('Error connecting to MongoDB:', err);
+  });
+
 const io = require('socket.io')(server, {
     cors: {
         origin: '*',
@@ -16,8 +29,7 @@ const io = require('socket.io')(server, {
 });
 
 const clientRooms = {};
-const roomCounters = {};
-const playersInRoom = {}; // Dictionary to store players in each room
+const playersInRoom = {}; 
 
 io.on('connection', client => {
     console.log('Client Connected: ', client.id);
