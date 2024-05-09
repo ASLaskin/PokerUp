@@ -10,6 +10,7 @@ app.use(cors());
 const server = http.createServer(app);
 
 
+
 const MONGODB_PASS = process.env.MongoDBPass;
 const mongoURI = `mongodb+srv://AndrewPokerUp:${MONGODB_PASS}@cluster0.axjopzt.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -105,18 +106,53 @@ io.on('connection', client => {
         }
     });
 
+    client.on("requestCards", (roomName, players) => {
+        handleDealCards(client, roomName, players);
+        
+    });
+
+    //I want to move these to different files so this one isnt crazy long
+    function handleDealCards(socket, roomName, players) {
+        console.log('Dealing cards');
+        const deck = ['Ace', 'King', 'Queen', 'Jack', '10', '9', '8', '7', '6', '5', '4', '3', '2'];
+        
+        const shuffledDeck = shuffle(deck);
+    
+        const dealtCards = {};
+    
+        players.forEach(player => {
+            dealtCards[player] = [];
+    
+            for (let i = 0; i < 2; i++) {
+                const card = shuffledDeck.pop(); 
+                dealtCards[player].push(card);
+            }
+            console.log('Dealt cards for', player, ':', dealtCards[player]);
+        });
+    
+        io.to(roomName).emit('cardsDealt', { cards: dealtCards });
+    }
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+        
     client.on('disconnect', () => {
         console.log('A client disconnected');
         const roomName = clientRooms[client.id];
         if (roomName && playersInRoom[roomName]) {
-            // Remove player from playersInRoom dictionary
             playersInRoom[roomName] = playersInRoom[roomName].filter(id => id !== client.id);
 
-            // Emit updated players list to clients in the room
+           
             io.to(roomName).emit('updatePlayers', playersInRoom[roomName]);
         }
         delete clientRooms[client.id];
     });
+
 });
 
 // Start the HTTP server
