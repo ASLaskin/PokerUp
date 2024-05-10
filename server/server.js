@@ -106,13 +106,13 @@ io.on('connection', client => {
         }
     });
 
-    client.on("requestCards", (roomName, players) => {
-        handleDealCards(client, roomName, players);
+    client.on("requestCards", ( players) => {
+        handleDealCards(client, players);
         
     });
 
     //I want to move these to different files so this one isnt crazy long
-    function handleDealCards(socket, roomName, players) {
+    function handleDealCards(socket, players) {
         console.log('Dealing cards');
         const deck = [
             'As', 'Ks', 'Qs', 'Js', '10s', '9s', '8s', '7s', '6s', '5s', '4s', '3s', '2s',
@@ -135,7 +135,7 @@ io.on('connection', client => {
             console.log('Dealt cards for', player, ':', dealtCards[player]);
         });
     
-        io.to(roomName).emit('cardsDealt', { cards: dealtCards });
+        socket.emit('cardsDealt', { cards: dealtCards });
     }
 
     function shuffle(array) {
