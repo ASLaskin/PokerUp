@@ -29,7 +29,8 @@ function Play({ socket }) {
                 const aPlayer = new PokerPlayer(socket, playerId);
                 table.addPlayer(aPlayer);
             });
-           
+             //this would be changed to somewhere else so we can keep calling it
+            table.newRound();
         }
     }
     return (

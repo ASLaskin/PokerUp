@@ -20,6 +20,8 @@ class Table{
     newRound(){
         console.log('New Round');
         this.gameSocket.emit('requestCards', this.players);
+        console.log('Requested cards');
+        this.gameSocket.on('dealCards', this.dealCards);
 
     }
 

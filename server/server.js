@@ -107,8 +107,8 @@ io.on('connection', client => {
     });
 
     client.on("requestCards", ( players) => {
+        console.log('We got here')
         handleDealCards(client, players);
-        
     });
 
     //I want to move these to different files so this one isnt crazy long
@@ -122,17 +122,17 @@ io.on('connection', client => {
         ];
         
         const shuffledDeck = shuffle(deck);
-    
+
         const dealtCards = {};
     
         players.forEach(player => {
-            dealtCards[player] = [];
+            dealtCards[player.playerId] = [];
     
             for (let i = 0; i < 2; i++) {
                 const card = shuffledDeck.pop(); 
-                dealtCards[player].push(card);
+                dealtCards[player.playerId].push(card);
             }
-            console.log('Dealt cards for', player, ':', dealtCards[player]);
+            console.log('Dealt cards for', player.playerId, ':', dealtCards[player.playerId]);
         });
     
         socket.emit('cardsDealt', { cards: dealtCards });
