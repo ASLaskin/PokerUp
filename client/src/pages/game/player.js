@@ -7,7 +7,6 @@ class PokerPlayer {
         this.stack = 1000;
         this.hand = [];
 
-        console.log('Player joined: ', playerId);
 
         //This is just boiler plate I saw somewhere
         //Keeping it just as a remind of user actions
@@ -19,16 +18,21 @@ class PokerPlayer {
         gameSocket.on('betTable', this.betTable);
         gameSocket.on('raiseTable', this.raiseTable);
         gameSocket.on('callTable', this.callTable);
+        gameSocket.on('allInTable', this.allInTable);
+
+        gameSocket.on('cardsDealt', this.requestCards.bind(this));
+
+
+    
 
 	}
-    modifyStack(amount){
-        //Need to emit to the client
-        this.stack += amount;
+    requestCards(cards){
+        console.log(this.playerId)
+        this.hand = cards;
+        console.log("Player:",this.playerId,"recieved:", this.hand);
     }
-    modifyHand(card){
-        //Need to emit to the client
-        this.hand.push(card);
-    }
+
+
 }
 //Define functions 
 export default PokerPlayer;

@@ -36,6 +36,7 @@ io.on('connection', client => {
     console.log('Client Connected: ', client.id);
     client.on('joinGame', handleJoinGame);
     client.on('newGame', handleNewGame);
+    client.on("requestCards",handleDealCards);
 
     function handleJoinGame(roomName) {
         console.log('Joining room', roomName);
@@ -106,13 +107,11 @@ io.on('connection', client => {
         }
     });
 
-    client.on("requestCards", ( players) => {
-        console.log('We got here')
-        handleDealCards(client, players);
-    });
+   
+
 
     //I want to move these to different files so this one isnt crazy long
-    function handleDealCards(socket, players) {
+    function handleDealCards() {
         console.log('Dealing cards');
         const deck = [
             'As', 'Ks', 'Qs', 'Js', '10s', '9s', '8s', '7s', '6s', '5s', '4s', '3s', '2s',
@@ -124,18 +123,14 @@ io.on('connection', client => {
         const shuffledDeck = shuffle(deck);
 
         const dealtCards = {};
-    
-        players.forEach(player => {
-            dealtCards[player.playerId] = [];
-    
-            for (let i = 0; i < 2; i++) {
-                const card = shuffledDeck.pop(); 
-                dealtCards[player.playerId].push(card);
-            }
-            console.log('Dealt cards for', player.playerId, ':', dealtCards[player.playerId]);
+
+        console.log('Players in room', playersInRoom[clientRooms[client.id]]);
+        playersInRoom[clientRooms[client.id]].forEach(playerId => {
+            dealtCards[playerId] = [shuffledDeck.pop(), shuffledDeck.pop()];
+            console.log('Dealt cards to player', playerId, dealtCards[playerId])
+            client.emit('cardsDealt', dealtCards[playerId])
         });
-    
-        socket.emit('cardsDealt', { cards: dealtCards });
+
     }
 
     function shuffle(array) {
